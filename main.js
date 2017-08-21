@@ -8,6 +8,30 @@ const client = new Discord.Client();
 
 const supported_langs = {};
 
+const highlight_js_prefixes = [
+	"1c", "abnf", "accesslog", "actionscript", "ada", "apache", "applescript",
+	"arduino", "armasm", "asciidoc", "aspectj", "autohotkey", "autoit", "avrasm",
+	"awk", "axapta", "bash", "basic", "bnf", "brainfuck", "cal", "capnproto", "ceylon",
+	"clean", "clojure-repl", "clojure", "cmake", "coffeescript", "coq", "cos",
+	"cpp", "crmsh", "crystal", "cs", "csp", "css", "d", "dart", "delphi", "diff",
+	"django", "dns", "dockerfile", "dos", "dsconfig", "dts", "dust", "ebnf",
+	"elixir", "elm", "erb", "erlang-repl", "erlang", "excel", "fix", "flix", "fortran",
+	"fsharp", "gams", "gauss", "gcode", "gherkin", "glsl", "go", "golo", "gradle", "groovy",
+	"haml", "handlebars", "haskell", "haxe", "hsp", "htmlbars", "http", "hy", "inform7",
+	"ini", "irpf90", "java", "javascript", "jboss-cli", "json", "julia-repl", "julia",
+	"kotlin", "lasso", "ldif", "leaf", "less", "lisp", "livecodeserver", "livescript",
+	"llvm", "lsl", "lua", "makefile", "markdown", "mathematica", "matlab", "maxima",
+	"mel", "mercury", "mipsasm", "mizar", "mojolicious", "monkey", "moonscript", "n1ql",
+	"nginx", "nimrod", "nix", "nsis", "objectivec", "ocaml", "openscad", "oxygene",
+	"parser3", "perl", "pf", "php", "pony", "powershell", "processing", "profile",
+	"prolog", "protobuf", "puppet", "purebasic", "python", "q", "qml", "r", "rib",
+	"roboconf", "routeros", "rsl", "ruby", "ruleslanguage", "rust", "scala", "scheme",
+	"scilab", "scss", "shell", "smali", "smalltalk", "sml", "sqf", "sql", "stan", "stata",
+	"step21", "stylus", "subunit", "swift", "taggerscript", "tap", "tcl", "tex", "thrift",
+	"tp", "twig", "typescript", "vala", "vbnet", "vbscript-html", "vbscript", "verilog",
+	"vhdl", "vim", "x86asm", "xl", "xml", "xquery", "yaml", "zephir"
+];
+
 // TODO: Handle connection error
 client.on("ready", () => {
 	console.log("Bot is ready.");
@@ -41,6 +65,7 @@ function is_lang_supported(potential_language) {
 }
 
 function compile_hackerrank(source, language, cb) {
+	console.log(source);
 	request.post({
 		url: "http://api.hackerrank.com/checker/submission.json",
 		form: {
@@ -52,7 +77,6 @@ function compile_hackerrank(source, language, cb) {
 	}, function(err, response, body) {
 		if (err) throw err;
 		const data = JSON.parse(body);
-		console.log(data);
 		cb({
 			stdout: data.result.stdout,
 			stderr: data.result.stderr,
@@ -71,6 +95,10 @@ function list_languages() {
 	return output;
 }
 
+String.prototype.escape = function() {
+	return this.replace(/```/g, "\\`\\`\\`");
+}
+
 function on_message(message) {
 	// Ignore everything from ourself (might allow exploits)
 	if (message.author.id == config.discord_id) { return; }
@@ -83,10 +111,18 @@ function on_message(message) {
 
 	const args = message.content.split(" ");
 	if (args.length < 3) {
-		if (args.length == 2 && args[1] === "langs" || args[1] === "languages") {
-			message.author.send(list_languages());
-		} else {
-			message.channel.send(`<@${message.author.id}>: Please specify a language.`);
+		if (args.length == 2) {
+			switch (args[1]) {
+				case "langs":
+				case "languages":
+					message.author.send(list_languages());
+					return;
+				case "source":
+					message.channel.send(`<@${message.author.id}>: https://github.com/64/DiscordCompileBot`);
+					return;
+				default:
+			}
+			message.channel.send(`<@${message.author.id}>: **Unknown command or missing code block after '${args[1]}'`);
 		}
 		return;
 	}
@@ -95,22 +131,39 @@ function on_message(message) {
 	const language = is_lang_supported(language_string);
 
 	if (typeof language === "undefined") {
-		message.channel.send(`<@${message.author.id}>: Unrecognised language '${language_string}'.`);
+		message.channel.send(`<@${message.author.id}>: **Unrecognised language '${language_string}'**.`);
 		return;
 	}
 
-	// Language is recognised, now compile it
 	message.channel.send(`<@${message.author.id}>: Compiling ${language.full}...`);
-	compile_hackerrank(args.slice(2).join(" "), language, output => {
-		if (output.compile_message.length != 0) {
-			message.channel.send(`Compiler message: \`\`\`${output.compile_message}\`\`\``);
-		}
 
+	// Extract the source code
+	let source = args.slice(2);
+
+	// Remove the markdown highlighting hint
+	if (source[0].substr(0, 3) === "```") {
+		for (const idx in highlight_js_prefixes) {
+			const hjs_prefix = highlight_js_prefixes[idx];
+			if (source[0].substr(3, hjs_prefix.length + 1) === (hjs_prefix + "\n")) {
+				source[0] = "```\n" + source[0].substr(4 + hjs_prefix.length);
+				break;
+			}
+		}
+	}
+
+	// Escape backticks
+	source = source.join(" ").replace(/```/g, "");
+
+	// Now compile it
+	compile_hackerrank(source, language, output => {
+		if (output.compile_message.length != 0) {
+			message.channel.send(`Compiler message: \`\`\`${output.compile_message.escape()}\`\`\``);
+		}
 		if (output.stdout != null && output.stdout[0].length != 0) {
-			message.channel.send(`Output (stdout): \`\`\`${output.stdout[0]}\`\`\``);
+			message.channel.send(`**Output (stdout):** \`\`\`${output.stdout[0].escape()}\`\`\``);
 		}
 		if (output.stderr != null && output.stderr[0].length != 0 && output.stderr[0] !== false) {
-			message.channel.send(`Output (stderr): \`\`\`${output.stderr[0]}\`\`\``);
+			message.channel.send(`Output (stderr): \`\`\`${output.stderr[0].escape()}\`\`\``);
 		}
 	});
 }

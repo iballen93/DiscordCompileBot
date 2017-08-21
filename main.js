@@ -103,8 +103,7 @@ function on_message(message) {
 	// Ignore everything from ourself (might allow exploits)
 	if (message.author.id == config.discord_id) { return; }
 
-	const first_mention = message.mentions.users.first();
-	if (typeof first_mention === "undefined" || first_mention.id != config.discord_id) {
+	if (message.content.substr(0, 21) !== `<@${config.discord_id}>`) {
 		// It doesn't mention us so we don't care
 		return;
 	}
@@ -125,6 +124,19 @@ function on_message(message) {
 			message.channel.send(`<@${message.author.id}>: **Unknown command or missing code block after '${args[1]}'`);
 		}
 		return;
+	}
+
+	// Remove leading spaces
+	while (args[1].length == 0) {
+		args.splice(1, 1);
+	}
+
+	if (args[1].indexOf("\n") < args[1].indexOf("`")) {
+		const idx = args[1].indexOf("\n");
+		const first_part = args[1].substr(0, idx);
+		const second_part = args[1].substr(idx + 1);
+		args[1] = first_part;
+		args.splice(1, 0, second_part);
 	}
 
 	const language_string = args[1];

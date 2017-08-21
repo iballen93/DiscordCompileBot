@@ -26,8 +26,7 @@
   "dependencies": {
     "discord.js": "^11.1.0",
     "erlpack": "github:hammerandchisel/erlpack",
-    "ideone-npm": "^2.0.1",
     "request": "^2.81.0",
-    "uws": "^8.14.1"
+    "uws": "^0.14.5"
   }
 }

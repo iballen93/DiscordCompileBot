@@ -38,8 +38,8 @@ client.on("ready", () => {
 	get_langs();
 });
 
+// Load supported languages from hackerrank API
 function get_langs() {
-	// TODO: Get IDEOne languages
 	request.get({
 		url: "http://api.hackerrank.com/checker/languages.json",
 		form: {
@@ -121,6 +121,8 @@ function parse_arguments(str) {
 		}
 	}
 
+
+	// TODO: Remove this
 	console.log(results);
 
 	let args = [ `<@${config.discord_id}>` ];

@@ -60,7 +60,7 @@ Highlight.js does not attempt to syntax highlight the code block unless you put 
     ```
 &nbsp;
 
-(The last example is not valid because python3 is not a valid `highlight.js` supported language. Use `python` for the syntax highlighting and write `python3` before the backticks, just as shown in the final valid example).
+This is not valid because python3 isn't a valid `highlight.js` supported language. Use `python` for the syntax highlighting and write `python3` before the backticks, just as shown in the final valid example.
 
 ## Add to your server
 

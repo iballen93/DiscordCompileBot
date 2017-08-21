@@ -1,0 +1,32 @@
+{
+  "name": "compile",
+  "version": "1.0.0",
+  "description": "A Discord bot that compiles code and shows you the output",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"\\x1B[31mYou silly person, you can't test here!\" && exit 1",
+    "start": "node src/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/64/DiscordCompileBot.git"
+  },
+  "keywords": [
+    "discord",
+    "compile",
+    "bot",
+    "ideone"
+  ],
+  "author": "Matthew Taylor",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/64/DiscordCompileBot/issues"
+  },
+  "homepage": "https://github.com/64/DiscordCompileBot#readme",
+  "dependencies": {
+    "discord.js": "^11.1.0",
+    "erlpack": "github:hammerandchisel/erlpack",
+    "ideone-npm": "^2.0.1",
+    "uws": "^8.14.1"
+  }
+}

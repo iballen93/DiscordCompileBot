@@ -164,6 +164,9 @@ function on_message(message) {
 			case "source":
 				message.channel.send(`<@${message.author.id}>: https://github.com/64/DiscordCompileBot`);
 				return;
+			case "help":
+				message.channel.send(`<@${message.author.id}>: https://github.com/64/DiscordCompileBot/blob/master/README.md`);
+				return;
 			default:
 		}
 		message.channel.send(`<@${message.author.id}>: **Unknown command or missing code block after '${args[1]}'`);

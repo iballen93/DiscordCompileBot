@@ -65,7 +65,6 @@ function is_lang_supported(potential_language) {
 }
 
 function compile_hackerrank(source, language, cb) {
-	console.log(source);
 	request.post({
 		url: "http://api.hackerrank.com/checker/submission.json",
 		form: {
@@ -99,19 +98,49 @@ String.prototype.escape = function() {
 	return this.replace(/```/g, "\\`\\`\\`");
 }
 
-function parse_arguments(str) {
-	let args = [ `<@${config.discord_id}>` ];
-
-	console.log(str.substr(21));
-	const results = /\s+(\w+)?(?:\s+)?```(\w+\n)?([\s\S]+)```/gm.exec(str.substr(21));
-	if (typeof results[1] !== "undefined") {
-		args.push(results[1]);
-		console.log(results[1]);
-	} else {
-		args.push(results[2].slice(0, -1));
+function is_markdown_prefix(name) {
+	for (const idx in highlight_js_prefixes) {
+		const hjs = highlight_js_prefixes[idx];
+		if (hjs.toLowerCase() == name.toLowerCase()) {
+			return true;
+		}
 	}
-	args.push(results[3]);
-	console.log(args);
+	return false;
+}
+
+function parse_arguments(str) {
+	const results = /\s+(\w+)?(?:\s+)?```(\w+\n)?([\s\S]+)```/m.exec(str.substr(21));
+
+	if (results == null) {
+		// Try parse a single command instead of a code block
+		const second_parse = /\s+(\w+)/.exec(str.substr(21));
+		if (second_parse == null) {
+			return null;
+		} else {
+			return [ undefined, second_parse[1] ];
+		}
+	}
+
+	console.log(results);
+
+	let args = [ `<@${config.discord_id}>` ];
+	if (typeof results[1] !== "undefined") {
+		if (typeof results[2] !== "undefined" && !is_markdown_prefix(results[2].slice(0, -1))) {
+			results[2] += results[3];
+			results[3] = results[2];
+		}
+		args.push(results[1]);
+		args.push(results[3]);
+	} else {
+		if (typeof results[2] !== "undefined" && is_markdown_prefix(results[2].slice(0, -1))) {
+			args.push(prefix);
+			args.push(results[3]);
+		}
+		else {
+			args.push(undefined);
+		}
+	}
+	return args;
 }
 
 function on_message(message) {
@@ -123,40 +152,31 @@ function on_message(message) {
 		return;
 	}
 
-	parse_arguments(message.content);
-
-	const args = message.content.split(" ");
-	if (args.length < 3) {
-		if (args.length == 2) {
-			switch (args[1]) {
-				case "langs":
-				case "languages":
-					message.author.send(list_languages());
-					return;
-				case "source":
-					message.channel.send(`<@${message.author.id}>: https://github.com/64/DiscordCompileBot`);
-					return;
-				default:
-			}
-			message.channel.send(`<@${message.author.id}>: **Unknown command or missing code block after '${args[1]}'`);
+	const args = parse_arguments(message.content);
+	if (args == null) {
+		return;
+	} else if (args[0] == undefined) {
+		switch (args[1]) {
+			case "langs":
+			case "languages":
+				message.author.send(list_languages());
+				return;
+			case "source":
+				message.channel.send(`<@${message.author.id}>: https://github.com/64/DiscordCompileBot`);
+				return;
+			default:
 		}
+		message.channel.send(`<@${message.author.id}>: **Unknown command or missing code block after '${args[1]}'`);
 		return;
 	}
 
-	// Remove leading spaces
-	while (args[1].length == 0) {
-		args.splice(1, 1);
-	}
-
-	if (args[1].indexOf("\n") < args[1].indexOf("`")) {
-		const idx = args[1].indexOf("\n");
-		const first_part = args[1].substr(0, idx);
-		const second_part = args[1].substr(idx + 1);
-		args[1] = first_part;
-		args.splice(1, 0, second_part);
-	}
-
 	const language_string = args[1];
+
+	if (typeof language_string === "undefined") {
+		message.channel.send(`<@${message.author.id}>: **Invalid syntax. Please enter a language or a command.**`);
+		return;
+	}
+
 	const language = is_lang_supported(language_string);
 
 	if (typeof language === "undefined") {
@@ -167,22 +187,8 @@ function on_message(message) {
 
 	message.channel.send(`<@${message.author.id}>: Compiling ${language.full}...`);
 
-	// Extract the source code
-	let source = args.slice(2);
-
-	// Remove the markdown highlighting hint
-	if (source[0].substr(0, 3) === "```") {
-		for (const idx in highlight_js_prefixes) {
-			const hjs_prefix = highlight_js_prefixes[idx];
-			if (source[0].substr(3, hjs_prefix.length + 1) === (hjs_prefix + "\n")) {
-				source[0] = "```\n" + source[0].substr(4 + hjs_prefix.length);
-				break;
-			}
-		}
-	}
-
 	// Escape backticks
-	source = source.join(" ").replace(/```/g, "");
+	let source = args[2].replace(/```/g, "");
 
 	// Now compile it
 	compile_hackerrank(source, language, output => {

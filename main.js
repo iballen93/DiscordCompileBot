@@ -99,6 +99,21 @@ String.prototype.escape = function() {
 	return this.replace(/```/g, "\\`\\`\\`");
 }
 
+function parse_arguments(str) {
+	let args = [ `<@${config.discord_id}>` ];
+
+	console.log(str.substr(21));
+	const results = /\s+(\w+)?(?:\s+)?```(\w+\n)?([\s\S]+)```/gm.exec(str.substr(21));
+	if (typeof results[1] !== "undefined") {
+		args.push(results[1]);
+		console.log(results[1]);
+	} else {
+		args.push(results[2].slice(0, -1));
+	}
+	args.push(results[3]);
+	console.log(args);
+}
+
 function on_message(message) {
 	// Ignore everything from ourself (might allow exploits)
 	if (message.author.id == config.discord_id) { return; }
@@ -107,6 +122,8 @@ function on_message(message) {
 		// It doesn't mention us so we don't care
 		return;
 	}
+
+	parse_arguments(message.content);
 
 	const args = message.content.split(" ");
 	if (args.length < 3) {
@@ -143,7 +160,8 @@ function on_message(message) {
 	const language = is_lang_supported(language_string);
 
 	if (typeof language === "undefined") {
-		message.channel.send(`<@${message.author.id}>: **Unrecognised language '${language_string}'**.`);
+		message.channel.send(`<@${message.author.id}>: **Unrecognised language '${language_string}'**. `
+				+ `Type "languages" or "langs" after mentioning me to see a list of supported languages.`);
 		return;
 	}
 
@@ -171,11 +189,15 @@ function on_message(message) {
 		if (output.compile_message.length != 0) {
 			message.channel.send(`Compiler message: \`\`\`${output.compile_message.escape()}\`\`\``);
 		}
-		if (output.stdout != null && output.stdout[0].length != 0) {
-			message.channel.send(`**Output (stdout):** \`\`\`${output.stdout[0].escape()}\`\`\``);
+		if (output.stdout != null) {
+			let stdout = output.stdout[0].escape();
+			if (stdout.length == 0) { stdout = "(empty)"; }
+			message.channel.send(`**Output (stdout):** \`\`\`${stdout}\`\`\``);
 		}
-		if (output.stderr != null && output.stderr[0].length != 0 && output.stderr[0] !== false) {
-			message.channel.send(`Output (stderr): \`\`\`${output.stderr[0].escape()}\`\`\``);
+		if (output.stderr != null && output.stderr[0] !== false) {
+			let stderr = output.stderr[0].escape();
+			if (stderr.length == 0) { stderr = "(empty)"; }
+			message.channel.send(`Output (stderr): \`\`\`${stderr}\`\`\``);
 		}
 	});
 }

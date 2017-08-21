@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"\\x1B[31mYou silly person, you can't test here!\" && exit 1",
-    "start": "node src/main.js"
+    "start": "node main.js"
   },
   "repository": {
     "type": "git",
@@ -27,6 +27,7 @@
     "discord.js": "^11.1.0",
     "erlpack": "github:hammerandchisel/erlpack",
     "ideone-npm": "^2.0.1",
+    "request": "^2.81.0",
     "uws": "^8.14.1"
   }
 }

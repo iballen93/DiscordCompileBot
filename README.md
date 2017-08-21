@@ -5,7 +5,7 @@
 Issue commands to the bot by pinging it as you would ping any other user:
 
     @CompileBot language_name
-    ```[syntax_highlight_name]
+    ```[optional_syntax_highlight_name]
     code
     goes
     here
@@ -17,40 +17,42 @@ A list of languages may be found by sending `@CompileBot languages`; a link to t
 
 ## Examples
 
-The following are **valid**:
+Following each example is a small explanation of why it is valid or invalid.
+
+#### The following are **valid**:
 
     @CompileBot python
     ```
     print 3 * 20
     ```
-&nbsp;
+This applies no syntax highlighting and compiles in python2.
 
     @CompileBot
     ```python
     print 3 * 20
     ```
-&nbsp;
+You can omit the first language name if it is the same as the name used for syntax highlighting by highlight.js. This is true for a number of languages.
 
     @CompileBot python3 ```python
     print(3 * 20)
     ```
-&nbsp;
+If the language you want to compile for has a different name than the syntax highlight name, then you need to explicitly provide it as such. This runs python3 code.
 
-The following are **invalid**:
+#### The following are **invalid**:
 
     @CompileBot ```
     print 3 * 20
     ```
-&nbsp;
+No language was specified in either possible position, so the bot can't know what language you want to compile for.
 
     @CompileBot
     ```
     print 3 * 20
     ```
-&nbsp;
+Same as above.
 
     @CompileBot python3 ```python print 3 * 20```
-&nbsp;
+Highlight.js does not attempt to syntax highlight the code block unless you put a newline immediately after the highlight.js identifier, so this simply results in the code `python print 3 * 20` being passed to the python3 interpreter.
 
     @CompileBot
     ```python3

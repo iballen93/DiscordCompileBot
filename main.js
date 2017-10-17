@@ -95,7 +95,12 @@ function list_languages() {
 }
 
 String.prototype.escape = function() {
-	return this.replace(/```/g, "\\`\\`\\`");
+	let s = this;
+	if (this.length > 1930) {
+		s = this.substr(0, 1930);
+		s += "(output truncated)";
+	}
+	return s.replace(/```/g, "\\`\\`\\`");
 }
 
 function is_markdown_prefix(name) {
@@ -135,7 +140,7 @@ function parse_arguments(str) {
 		args.push(results[3]);
 	} else {
 		if (typeof results[2] !== "undefined" && is_markdown_prefix(results[2].slice(0, -1))) {
-			args.push(prefix);
+			args.push(results[2].slice(0, -1));
 			args.push(results[3]);
 		}
 		else {
@@ -171,7 +176,7 @@ function on_message(message) {
 				return;
 			default:
 		}
-		message.channel.send(`<@${message.author.id}>: **Unknown command or missing code block after '${args[1]}'`);
+		message.channel.send(`<@${message.author.id}>: **Unknown command or missing code block after '${args[1]}'**`);
 		return;
 	}
 
@@ -186,7 +191,7 @@ function on_message(message) {
 
 	if (typeof language === "undefined") {
 		message.channel.send(`<@${message.author.id}>: **Unrecognised language '${language_string}'**. `
-				+ `Type "languages" or "langs" after mentioning me to see a list of supported languages.`);
+				+ `Type "languages" or "langs" after mentioning me to see a list of supported languages (I will PM you the output).`);
 		return;
 	}
 

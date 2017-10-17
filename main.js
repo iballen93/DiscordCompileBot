@@ -141,13 +141,7 @@ function parse_arguments(str) {
 		args.push(results[1]);
 		args.push(results[3]);
 	} else {
-		if (typeof results[2] !== "undefined" && is_markdown_prefix(results[2].slice(0, -1))) {
-			args.push(results[2].slice(0, -1));
-			args.push(results[3]);
-		}
-		else {
-			args.push(undefined);
-		}
+		args.push(undefined);
 	}
 	return args;
 }

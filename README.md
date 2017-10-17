@@ -15,52 +15,15 @@ Note that you must submit the compilation request in one message - so in this ca
 
 A list of languages may be found by sending `@CompileBot languages`; a link to this README can be found with `@CompileBot help`; and a link to this repository can be found with `@CompileBot source`.
 
-## Examples
+Note that if the optional syntax highlight name is not a valid Discord highlight specifier then the bot will take it to be part of the input. Also, the optional syntax highlight name must be followed by a newline or else Discord won't highlight it and the bot will treat it as part of the input too.
 
-Following each example is a small explanation of why it is valid or invalid.
+## Example
 
-#### The following are **valid**:
-
-    @CompileBot python
-    ```
-    print 3 * 20
-    ```
-This applies no syntax highlighting and compiles in python2.
-
-    @CompileBot
-    ```python
-    print 3 * 20
-    ```
-You can omit the first language name if it is the same as the name used for syntax highlighting by highlight.js. This is true for a number of languages.
+Python3 code snippet (with python syntax highlighting):
 
     @CompileBot python3 ```python
-    print(3 * 20)
+    print(3 * 4 + 2)
     ```
-If the language you want to compile for has a different name than the syntax highlight name, then you need to explicitly provide it as such. This runs python3 code.
-
-#### The following are **invalid**:
-
-    @CompileBot ```
-    print 3 * 20
-    ```
-No language was specified in either possible position, so the bot can't know what language you want to compile for.
-
-    @CompileBot
-    ```
-    print 3 * 20
-    ```
-Same as above.
-
-    @CompileBot python3 ```python print 3 * 20```
-Highlight.js does not attempt to syntax highlight the code block unless you put a newline immediately after the highlight.js identifier, so this simply results in the code `python print 3 * 20` being passed to the python3 interpreter.
-
-    @CompileBot
-    ```python3
-    print(3 * 20)
-    ```
-&nbsp;
-
-This is not valid because python3 isn't a valid `highlight.js` supported language. Use `python` for the syntax highlighting and write `python3` before the backticks, just as shown in the final valid example.
 
 ## Add to your server
 

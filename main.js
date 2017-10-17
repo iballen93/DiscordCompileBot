@@ -1,5 +1,6 @@
 const Discord = require("discord.js");
 const request = require("request");
+const strip_ansi = require("strip-ansi");
 const fs = require("fs");
 
 // Parse config.json
@@ -95,12 +96,13 @@ function list_languages() {
 }
 
 String.prototype.escape = function() {
-	let s = this;
-	if (this.length > 1930) {
-		s = this.substr(0, 1930);
-		s += "(output truncated)";
+	// Strip ANSI escape sequences, replace non-ascii characters and escape backticks
+	let str = strip_ansi(this).replace(/[^\x00-\x7F]/g, "").replace(/```/g, "\\`\\`\\`");
+	if (str.length > 1930) {
+		str = str.substr(0, 1930);
+		str += "\n(output truncated)";
 	}
-	return s.replace(/```/g, "\\`\\`\\`");
+	return str;
 }
 
 function is_markdown_prefix(name) {

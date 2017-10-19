@@ -25,7 +25,7 @@ Python3 code snippet (with python syntax highlighting):
     print(3 * 4 + 2)
     ```
 
-![Demonstration gif](https://gyazo.com/a3a447603315f0f153fe5bfce36dcc19)
+![Demonstration GIF](https://i.gyazo.com/a3a447603315f0f153fe5bfce36dcc19.gif)
 
 ## Add to your server
 

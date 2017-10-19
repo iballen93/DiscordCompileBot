@@ -25,6 +25,8 @@ Python3 code snippet (with python syntax highlighting):
     print(3 * 4 + 2)
     ```
 
+![Demonstration gif](https://gyazo.com/a3a447603315f0f153fe5bfce36dcc19)
+
 ## Add to your server
 
 Go to this link to add the bot to your server (requires administrator permissions): https://discordapp.com/oauth2/authorize?&client_id=349019339913166848&scope=bot&permissions=0
